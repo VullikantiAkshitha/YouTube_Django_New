@@ -10,10 +10,8 @@ urlpatterns = [
     path('create-user', views.create_user, name='create-user'),
     path('login', views.custom_login, name='login'),
     path('logout', views.custom_logout, name='logout'),
-    path('create-channel', views.create_channel, name='create-channel'),
-
     path('upload-video', views.upload_video, name='upload-video'),
-
+    path('create-channel/', views.create_channel, name='create-channel'),
     path('searched', views.searched, name='searched'),
 
     path('video-view/<int:pk>', views.video_view, name='video-view'),

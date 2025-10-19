@@ -1,8 +1,8 @@
-from django.shortcuts import render, redirect
-
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
-
+from django.contrib import messages
 from django.contrib.auth.models import User
 from .models import Channel, Video, Comment
 
@@ -10,26 +10,34 @@ from .models import Channel, Video, Comment
 # Create your views here.
 def home(request):
     videos = Video.objects.all().order_by("-upload_time")
+    user_channel = None
+    if request.user.is_authenticated:
+        user_channel = Channel.objects.filter(user=request.user).first()
+    return render(request, "home.html", {
+        "videos": videos,
+        "user_channel": user_channel
+    })
 
-    return render(request, "home.html", {"videos": videos})
 
-
-def channel(request, username, pk):
-    user = User.objects.get(username=username)
-    channel = Channel.objects.get(user=user, id=pk)
-    videos = Video.objects.filter(channel=channel).order_by("-upload_time")
-
+def create_channel(request):
     if request.method == "POST":
-        action = request.POST["subscribe"]
+        name = request.POST.get("channelName")
+        pfp = request.FILES.get("channel_pfp")
 
-        if action == "unsubscribe":
-            channel.subscribers.remove(request.user)
-        else:
-            channel.subscribers.add(request.user)
+        if not name:
+            messages.error(request, "Channel name is required.")
+            return render(request, "create_channel.html")
 
+        channel = Channel(
+            user=request.user,
+            name=name,
+            profile_picture=pfp if pfp else "images/default_pfp.png",
+        )
         channel.save()
+        messages.success(request, "Channel created successfully!")
+        return redirect("home")
 
-    return render(request, "channel.html", {"channel": channel, "videos": videos})
+    return render(request, "create_channel.html")
 
 
 def video(request, pk):
@@ -73,24 +81,20 @@ def custom_logout(request):
     return redirect("home")
 
 
-def create_channel(request):
-    if request.user.is_authenticated:
-        if request.method == "POST":
-            name = request.POST["channelName"]
-            pfp = request.FILES.get("channel_pfp")
+def channel(request, username, pk):
+    channel = get_object_or_404(Channel,user__username=username, pk=pk)
 
-            if name and pfp:
-                channel = Channel(user=request.user, name=name, profile_picture=pfp)
-                channel.save()
-
-                return redirect("home")
-        else:
-            return render(request, "create_channel.html")
-
-    else:
-        return redirect("login")
-
-    return render(request, "create_channel.html")
+    if not channel:
+        return redirect("create-channel")
+    # Optional: verify that the username in the URL matches the channel's owner
+    if channel.user.username != username:
+        return render(request, "404.html", status=404)
+    
+    context = {
+        "channel": channel,
+        "videos": channel.video_set.all(),  # Assuming a related name from a Video model
+    }
+    return render(request, "channel.html", context)
 
 
 def upload_video(request):

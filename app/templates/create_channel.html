@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<form method="POST" action="{% url 'create-channel' %}" enctype="multipart/form-data" class="mx-auto" style="width: 50%; margin-top: 10px;">
+<form method="POST" action="{% url 'create-channel' %}" class="mx-auto" style="width: 50%; margin-top: 10px;">
     {% csrf_token %}
 
     <div class="mb-3">
