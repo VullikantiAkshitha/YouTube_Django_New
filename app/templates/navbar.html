@@ -1,6 +1,11 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
+<nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
   <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'home' %}">Youtube</a>
+    <!-- Logo -->
+    <a class="navbar-brand d-flex align-items-center text-light" href="{% url 'home' %}">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg" alt="YouTube" height="30">
+    </a>
+
+    <!-- Toggler for mobile view -->
     <button
       class="navbar-toggler"
       type="button"
@@ -12,74 +17,100 @@
     >
       <span class="navbar-toggler-icon"></span>
     </button>
+
+    <!-- Navbar content -->
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <!-- Left-side links -->
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="{% url 'home' %}"
-            >Home</a
-          >
+          <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Home</a>
         </li>
-        {% if request.user.is_authenticated %} {% if user_channel %}
-        <li class="nav-item">
-          <a
-            class="nav-link active"
-            href="{% url 'channel' username=user_channel.user.username pk=user_channel.pk %}"
-            >My-Channel</a
-          >
-        </li>
-        {% endif %}
-        <li class="nav-item">
-          <a
-            class="nav-link active"
-            aria-current="page"
-            href="{% url 'upload-video' %}"
-            >Upload</a
-          >
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link active"
-            aria-current="page"
-            href="{% url 'create-channel' %}"
-            >New-Channel</a
-          >
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link active"
-            aria-current="page"
-            href="{% url 'logout' %}"
-            >Logout</a
-          >
-        </li>
+        {% if request.user.is_authenticated %}
+          {% if user_channel %}
+          <li class="nav-item">
+            <a
+              class="nav-link active"
+              href="{% url 'channel' username=user_channel.user.username pk=user_channel.pk %}"
+              >My Channel</a
+            >
+          </li>
+          {% endif %}
+          <li class="nav-item">
+            <a
+              class="nav-link active d-flex align-items-center"
+              aria-current="page"
+              href="{% url 'upload-video' %}"
+            >
+              <i class="fa-solid fa-plus me-1"></i> Upload
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link active"
+              aria-current="page"
+              href="{% url 'create-channel' %}"
+              >New Channel</a
+            >
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link active"
+              aria-current="page"
+              href="{% url 'logout' %}"
+              >Logout</a
+            >
+          </li>
         {% else %}
-        <li class="nav-item">
-          <a
-            class="nav-link active"
-            aria-current="page"
-            href="{% url 'login' %}"
-            >Login</a
-          >
-        </li>
+          <li class="nav-item">
+            <a
+              class="nav-link active"
+              aria-current="page"
+              href="{% url 'login' %}"
+              >Login</a
+            >
+          </li>
         {% endif %}
       </ul>
 
+      <!-- Search bar -->
       <form
-        class="d-flex"
+        class="d-flex mx-auto"
         role="search"
         action="{% url 'searched' %}"
         method="post"
+        style="width: 50%;"
       >
         {% csrf_token %}
         <input
-          class="form-control me-2"
+          class="form-control me-2 bg-dark text-light"
           type="search"
           placeholder="Search"
           aria-label="Search"
           name="s"
+          style="border-radius: 20px; padding: 10px;"
         />
-        <button class="btn btn-outline-success" type="submit">Search</button>
+        <button class="btn btn-outline-light" type="submit" style="border-radius: 20px;">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
       </form>
+
+      <!-- Right-side icons -->
+      <ul class="navbar-nav ms-auto">
+        {% if request.user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link text-light" href="#">
+            <i class="fa-solid fa-bell"></i>
+          </a>
+        </li>
+{% if user_channel %}
+<li class="nav-item">
+  <a class="nav-link text-light" href="{% url 'channel' username=user_channel.user.username pk=user_channel.pk %}">
+    <img src="{{ user_channel.profile_picture.url }}" alt="Profile Picture" class="rounded-circle" height="30" width="30">
+  </a>
+</li>
+{% endif %}
+        {% endif %}
+      </ul>
     </div>
   </div>
 </nav>

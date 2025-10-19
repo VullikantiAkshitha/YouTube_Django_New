@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Update Video</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="video_title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="video_title" name="video_title" value="{{ video.title }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="video_description" class="form-label">Description</label>
+            <textarea class="form-control" id="video_description" name="video_description" rows="4">{{ video.description }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a href="{% url 'video' video.id %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

@@ -17,5 +17,7 @@ urlpatterns = [
     path('video-view/<int:pk>', views.video_view, name='video-view'),
     path('video-like/<int:pk>', views.video_like, name='video-like'),
     path('video-dislike/<int:pk>', views.video_dislike, name='video-dislike'),
-    path('video-comment/<int:pk>', views.video_comment, name='video-comment')
+    path('video-comment/<int:pk>', views.video_comment, name='video-comment'),
+    path('video/delete/<int:pk>', views.delete_video, name='delete-video'),
+    path('video/update/<int:pk>', views.update_video, name='update-video'),
 ]

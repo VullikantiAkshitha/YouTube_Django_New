@@ -3,6 +3,7 @@
 {% block content %}
 
 <div class="vstack align-items-center" style="margin: 20px;">
+    <a href="{% url 'video-view' video.id %}" style="display: none;"></a>
     <video width="80%" controls>
         <source src="{{video.video_file.url}}" type="video/mp4">
     </video>
@@ -40,6 +41,15 @@
                 <h4 class="card-title">{{video.title}}</h4>
                 <h6 class="card-text">{{video.description}}</h6>
                 <p class="card-text">{{video.upload_time}}</p>
+                <p class="card-text">{{video.number_of_views}} views</p>
+
+                    <!-- Add Update and Delete buttons -->
+    {% if request.user == video.user %}
+    <div class="d-flex justify-content-end">
+        <a href="{% url 'update-video' video.id %}" class="btn btn-warning me-2">Edit</a>
+        <a href="{% url 'delete-video' video.id %}" class="btn btn-danger">Delete</a>
+    </div>
+    {% endif %}
             </div>
         </div>
     </div>

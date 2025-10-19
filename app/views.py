@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
 from .models import Channel, Video, Comment
+from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
@@ -223,3 +224,32 @@ def video_comment(request, pk):
 
     else:
         return redirect("login")
+
+
+
+
+@login_required
+def delete_video(request, pk):
+    video = get_object_or_404(Video, id=pk, user=request.user)
+    if request.method == "POST":
+        video.delete()
+        return redirect("home")
+    return render(request, "delete_video.html", {"video": video})
+
+
+@login_required
+def update_video(request, pk):
+    video = get_object_or_404(Video, id=pk, user=request.user)
+    if request.method == "POST":
+        title = request.POST.get("video_title")
+        description = request.POST.get("video_description")
+
+        if title:
+            video.title = title
+        if description:
+            video.description = description
+
+        video.save()
+        return redirect("video", pk=video.id)
+
+    return render(request, "update_video.html", {"video": video})
