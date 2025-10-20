@@ -6,10 +6,15 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from .models import Channel, Video, Comment
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
+from .models import Video, Comment
+from . import views
+from django.shortcuts import render, get_object_or_404
+from .models import Video
 
 
 # Create your views here.
-def home(request):
+def home(request): 
     videos = Video.objects.all().order_by("-upload_time")
     user_channel = None
     if request.user.is_authenticated:
@@ -165,17 +170,20 @@ def searched(request):
             request, "searched.html", {"videos": videos, "channels": channels}
         )
 
+from django.shortcuts import render, get_object_or_404
+from .models import Video
 
 def video_view(request, pk):
-    if request.user.is_authenticated:
-        video = Video.objects.get(id=pk)
+    video = get_object_or_404(Video, pk=pk)
 
-        if not video.view.filter(id=request.user.id):
-            video.view.add(request.user)
+    # Count view only once per session
+    session_key = f'viewed_video_{video.pk}'
+    if not request.session.get(session_key):
+        video.views += 1
+        video.save()
+        request.session[session_key] = True
 
-        return redirect("video", pk=pk)
-    else:
-        return redirect("login")
+    return render(request, 'video.html', {'video': video})
 
 
 def video_like(request, pk):
@@ -209,21 +217,14 @@ def video_dislike(request, pk):
     else:
         return redirect("login")
 
-
 def video_comment(request, pk):
-    if request.user.is_authenticated:
-        video = Video.objects.get(id=pk)
-
-        if request.method == "POST":
-            comment_text = request.POST["comment"]
-            comment = Comment.objects.create(
-                user=request.user, video=video, text=comment_text
-            )
-
-        return redirect("video", pk=pk)
-
-    else:
-        return redirect("login")
+    video = get_object_or_404(Video, id=pk)
+    if request.method == 'POST':
+        text = request.POST.get('comment')
+        parent_id = request.POST.get('parent_id')
+        parent_comment = Comment.objects.get(id=parent_id) if parent_id else None
+        Comment.objects.create(video=video, user=request.user, text=text, parent=parent_comment)
+    return redirect('video-view', pk=video.id)
 
 
 
@@ -253,3 +254,18 @@ def update_video(request, pk):
         return redirect("video", pk=video.id)
 
     return render(request, "update_video.html", {"video": video})
+
+def video_detail(request, video_id):
+    video = get_object_or_404(Video, id=video_id)
+
+    # Increase views only once per user session
+    session_key = f'viewed_video_{video_id}'
+    if not request.session.get(session_key, False):
+        video.views += 1
+        video.save()
+        request.session[session_key] = True
+
+    context = {
+        'video': video,
+    }
+    return render(request, 'video_detail.html', context)

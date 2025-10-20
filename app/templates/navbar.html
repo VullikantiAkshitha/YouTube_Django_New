@@ -28,46 +28,31 @@
         {% if request.user.is_authenticated %}
           {% if user_channel %}
           <li class="nav-item">
-            <a
-              class="nav-link active"
-              href="{% url 'channel' username=user_channel.user.username pk=user_channel.pk %}"
-              >My Channel</a
-            >
+            <a class="nav-link active" href="{% url 'channel' username=user_channel.user.username pk=user_channel.pk %}">
+              My Channel
+            </a>
           </li>
           {% endif %}
           <li class="nav-item">
-            <a
-              class="nav-link active d-flex align-items-center"
-              aria-current="page"
-              href="{% url 'upload-video' %}"
-            >
-              <i class="fa-solid fa-plus me-1"></i> Upload
+            <a class="nav-link active" aria-current="page" href="{% url 'upload-video' %}">
+              Upload
             </a>
           </li>
           <li class="nav-item">
-            <a
-              class="nav-link active"
-              aria-current="page"
-              href="{% url 'create-channel' %}"
-              >New Channel</a
-            >
+            <a class="nav-link active" aria-current="page" href="{% url 'create-channel' %}">
+              New Channel
+            </a>
           </li>
           <li class="nav-item">
-            <a
-              class="nav-link active"
-              aria-current="page"
-              href="{% url 'logout' %}"
-              >Logout</a
-            >
+            <a class="nav-link active" aria-current="page" href="{% url 'logout' %}">
+              Logout
+            </a>
           </li>
         {% else %}
           <li class="nav-item">
-            <a
-              class="nav-link active"
-              aria-current="page"
-              href="{% url 'login' %}"
-              >Login</a
-            >
+            <a class="nav-link active" aria-current="page" href="{% url 'login' %}">
+              Login
+            </a>
           </li>
         {% endif %}
       </ul>
@@ -102,13 +87,13 @@
             <i class="fa-solid fa-bell"></i>
           </a>
         </li>
-{% if user_channel %}
-<li class="nav-item">
-  <a class="nav-link text-light" href="{% url 'channel' username=user_channel.user.username pk=user_channel.pk %}">
-    <img src="{{ user_channel.profile_picture.url }}" alt="Profile Picture" class="rounded-circle" height="30" width="30">
-  </a>
-</li>
-{% endif %}
+        {% if user_channel %}
+        <li class="nav-item">
+          <a class="nav-link text-light" href="{% url 'channel' username=user_channel.user.username pk=user_channel.pk %}">
+            <img src="{{ user_channel.profile_picture.url }}" alt="Profile Picture" class="rounded-circle" height="30" width="30">
+          </a>
+        </li>
+        {% endif %}
         {% endif %}
       </ul>
     </div>

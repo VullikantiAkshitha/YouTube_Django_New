@@ -1,15 +1,14 @@
 {% extends 'base.html' %}
-
 {% block content %}
 
 <div class="vstack align-items-center" style="margin: 20px;">
-    <a href="{% url 'video-view' video.id %}" style="display: none;"></a>
     <video width="80%" controls>
-        <source src="{{video.video_file.url}}" type="video/mp4">
+        <source src="{{ video.video_file.url }}" type="video/mp4">
     </video>
 
-    <p>{{video.number_of_views}} views</p>  
+    <p>{{ video.number_of_views }} views</p>
 
+    <!-- Likes/Dislikes -->
     <div class="card text-center" style="margin: 10px;">
         <div class="card-header">
             <ul class="nav nav-tabs card-header-tabs">
@@ -17,69 +16,97 @@
                     {% if request.user in video.likes.all %}
                     <a href="{% url 'video-like' video.id %}"><i class="fa-solid fa-thumbs-up"></i></a>
                     {% else %}
-                        <a href="{% url 'video-like' video.id %}"><i class="fa-regular fa-thumbs-up"></i></a>
+                    <a href="{% url 'video-like' video.id %}"><i class="fa-regular fa-thumbs-up"></i></a>
                     {% endif %}
                 </li>
                 <li class="nav-item" style="margin-right: 10px;">
-                    <p>{{video.number_of_likes}}</p>
+                    <p>{{ video.number_of_likes }}</p>
                 </li>
                 <li class="nav-item" style="margin-right: 5px;">
                     {% if request.user in video.dislikes.all %}
                     <a href="{% url 'video-dislike' video.id %}"><i class="fa-solid fa-thumbs-down"></i></a>
                     {% else %}
-                        <a href="{% url 'video-dislike' video.id %}"><i class="fa-regular fa-thumbs-down"></i></a>
+                    <a href="{% url 'video-dislike' video.id %}"><i class="fa-regular fa-thumbs-down"></i></a>
                     {% endif %}
                 </li>
                 <li class="nav-item" style="margin-right: 10px;">
-                    <p>{{video.number_of_dislikes}}</p>
+                    <p>{{ video.number_of_dislikes }}</p>
                 </li>
             </ul>
         </div>
     </div>
-        <div class="card" style="margin: 20px; width: 80%;">
-            <div class="card-body">
-                <h4 class="card-title">{{video.title}}</h4>
-                <h6 class="card-text">{{video.description}}</h6>
-                <p class="card-text">{{video.upload_time}}</p>
-                <p class="card-text">{{video.number_of_views}} views</p>
 
-                    <!-- Add Update and Delete buttons -->
-    {% if request.user == video.user %}
-    <div class="d-flex justify-content-end">
-        <a href="{% url 'update-video' video.id %}" class="btn btn-warning me-2">Edit</a>
-        <a href="{% url 'delete-video' video.id %}" class="btn btn-danger">Delete</a>
-    </div>
-    {% endif %}
+    <!-- Video Details -->
+    <div class="card" style="margin: 20px; width: 80%;">
+        <div class="card-body">
+            <h4 class="card-title">{{ video.title }}</h4>
+            <h6 class="card-text">{{ video.description }}</h6>
+            <p class="card-text">{{ video.upload_time }}</p>
+            <p class="card-text">{{ video.number_of_views }} views</p>
+
+            {% if request.user == video.user %}
+            <div class="d-flex justify-content-end">
+                <a href="{% url 'update-video' video.id %}" class="btn btn-warning me-2">Edit</a>
+                <a href="{% url 'delete-video' video.id %}" class="btn btn-danger">Delete</a>
             </div>
+            {% endif %}
         </div>
     </div>
-
-    <h4 style="margin-left: 10%;">Create a comment</h4>
-
-    <form method="post" action="{% url 'video-comment' video.id %}">
-        {% csrf_token %}
-        <div class="form-group" style="width: 80%; margin-left: 10%;">
-            <textarea class="form-control" name="comment" rows="3" cols="120"></textarea>
-        </div><br>
-        <div class="text-center">
-            <button type="submit" class="btn btn-success">Post</button>
-        </div>
-
-    </form>
 </div>
 
-<h2 style="margin-left: 10%;">Comments: </h2>
+<!-- Comment Form -->
+<h4 style="margin-left: 10%;">Create a comment</h4>
+<form method="post" action="{% url 'video-comment' video.id %}">
+    {% csrf_token %}
+    <div class="form-group" style="width: 80%; margin-left: 10%;">
+        <textarea class="form-control" name="comment" rows="3" cols="120"></textarea>
+    </div><br>
+    <div class="text-center">
+        <button type="submit" class="btn btn-success">Post</button>
+    </div>
+</form>
+
+<!-- Comments -->
+<h2 style="margin-left: 10%;">Comments</h2>
 <div class="card" style="margin: 20px; width: 80%; margin-left: 10%;">
-    <ul>
+    <ul class="list-unstyled">
         {% for comment in video.comments.all %}
-            <li>
-                <p><strong>{{comment.user.username}}</strong>: {{comment.created_at}}</p>
-                <p>{{comment.text}}</p>
+            {% if not comment.parent %}
+            <li style="margin-bottom: 20px;">
+                <p><strong>{{ comment.user.username }}</strong> • {{ comment.created_at }}</p>
+                <p>{{ comment.text }}</p>
+
+                <!-- Reply form -->
+                <form method="post" action="{% url 'video-comment' video.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                    <textarea class="form-control" name="comment" rows="2" placeholder="Reply to this comment..."></textarea><br>
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Reply</button>
+                </form>
+
+                <!-- Replies -->
+                <ul style="margin-left: 30px; margin-top: 10px;">
+                    {% for reply in comment.replies.all %}
+                    <li>
+                        <p><strong>{{ reply.user.username }}</strong> • {{ reply.created_at }}</p>
+                        <p>{{ reply.text }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
             </li>
-        {% empty %}
-            <p>No comments yet</p>
+            {% endif %}
         {% endfor %}
     </ul>
 </div>
 
 {% endblock %}
+{% for video in videos %}
+  <div class="card" style="width: 18rem; margin: 10px;">
+    <a href="{% url 'video-view' video.id %}">
+      <img src="{{ video.thumbnail.url }}" class="card-img-top" alt="{{ video.title }}">
+      <div class="card-body">
+        <h5 class="card-title">{{ video.title }}</h5>
+      </div>
+    </a>
+  </div>
+{% endfor %}
