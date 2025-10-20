@@ -1,6 +1,36 @@
-from django.contrib import admin
+# from django.contrib import admin
+# from .models import Video, Comment
 
-from .models import Channel, Video
+# # Unregister Video if already registered
+# try:
+#     admin.site.unregister(Video)
+# except admin.sites.NotRegistered:
+#     pass
 
-admin.site.register(Channel)
-admin.site.register(Video)
+# # Register Video
+# @admin.register(Video)
+# class VideoAdmin(admin.ModelAdmin):
+#     list_display = ('title', 'uploaded_by', 'uploaded_at', 'views')
+
+# # Unregister Comment if already registered
+# try:
+#     admin.site.unregister(Comment)
+# except admin.sites.NotRegistered:
+#     pass
+
+# # Register Comment
+# @admin.register(Comment)
+# class CommentAdmin(admin.ModelAdmin):
+#     list_display = ('video', 'user', 'created_at')
+#     # Remove 'parent' if it's causing errors
+#     # You can add it later if the field exists properly
+
+# from django.contrib import admin
+# from .models import Video, Comment
+
+# # Unregister if already registered
+# for model in [Video, Comment]:
+#     try:
+#         admin.site.unregister(model)
+#     except admin.sites.NotRegistered:
+#         pass
