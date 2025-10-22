@@ -1,9 +1,12 @@
+{% load static %}
 <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
   <div class="container-fluid">
     <!-- Logo -->
-    <a class="navbar-brand d-flex align-items-center text-light" href="{% url 'home' %}">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg" alt="YouTube" height="30">
-    </a>
+
+<a class="navbar-brand d-flex align-items-center text-light" href="{% url 'home' %}">
+    <img src="{% static 'images/logo.png' %}" alt="YouTube" height="30">
+</a>
+
 
     <!-- Toggler for mobile view -->
     <button

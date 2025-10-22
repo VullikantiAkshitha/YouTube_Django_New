@@ -217,6 +217,8 @@ def video_dislike(request, pk):
     else:
         return redirect("login")
 
+
+@login_required(login_url='login') 
 def video_comment(request, pk):
     video = get_object_or_404(Video, id=pk)
     if request.method == 'POST':

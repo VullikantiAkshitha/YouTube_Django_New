@@ -45,11 +45,44 @@ class Video(models.Model):
 
 
 class Comment(models.Model):
-    video = models.ForeignKey(Video, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    # Link to the video the comment is on
+    video = models.ForeignKey(
+        Video, 
+        related_name='comments', 
+        on_delete=models.CASCADE
+    )
+    
+    # The actual comment text
     text = models.TextField()
-    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
+    
+    # Link to the parent comment for replies (nesting)
+    # This is a ForeignKey to 'self' and is nullable (null=True)
+    # A top-level comment will have parent=None
+    parent = models.ForeignKey(
+        'self', 
+        null=True, 
+        blank=True, 
+        related_name='replies', 
+        on_delete=models.CASCADE
+    )
+    
+    # User who posted the comment (assuming you're using Django's User model)
+    # You might need to import User: from django.contrib.auth.models import User
+    user = models.ForeignKey(
+        'auth.User', 
+        on_delete=models.CASCADE
+    ) 
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['created_at']
+
     def __str__(self):
-        return f"{self.user.username}: {self.text[:30]}"
+        # Shows a preview of the comment text
+        return f'Comment by {self.user.username} on {self.video.title[:20]}: {self.text[:50]}'
+
+    # Property to check if it's a top-level comment
+    @property
+    def is_parent(self):
+        return self.parent is None
