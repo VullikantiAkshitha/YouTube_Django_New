@@ -271,3 +271,28 @@ def video_detail(request, video_id):
         'video': video,
     }
     return render(request, 'video_detail.html', context)
+
+@login_required
+def edit_comment(request, pk):
+    comment = get_object_or_404(Comment, pk=pk, user=request.user)
+
+    if request.method == 'POST':
+        text = request.POST.get('comment')
+        if text:
+            comment.text = text
+            comment.save()
+            return HttpResponse(status=200)  # Return a success status
+        else:
+            return HttpResponse(status=400, content="Comment cannot be empty.") # Return error
+    return HttpResponse(status=400) #If not POST return error
+
+
+@login_required
+def delete_comment(request, pk):
+    comment = get_object_or_404(Comment, pk=pk, user=request.user)
+    video_id = comment.video.id  # Store video ID before deleting the comment
+    if request.method == 'POST':
+        comment.delete()
+        return redirect('video-view', pk=video_id)  # Redirect to the video view
+
+    return render(request, 'delete_comment.html', {'comment': comment})

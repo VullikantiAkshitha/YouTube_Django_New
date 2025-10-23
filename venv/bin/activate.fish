@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV /home/vullikanti-akshitha/Desktop/YouTube-Django/venv
+set -gx VIRTUAL_ENV /home/vullikanti-akshitha/Desktop/YouTube_Django_New/venv
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"bin $PATH

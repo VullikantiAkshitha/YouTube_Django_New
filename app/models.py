@@ -26,7 +26,7 @@ class Video(models.Model):
     description = models.TextField(null=True, blank=True)
     thumbnail = models.ImageField(upload_to="images/")
 
-    views = models.PositiveIntegerField(default=0)  # ✅ Add this line
+    views = models.PositiveIntegerField(default=0) 
     view = models.ManyToManyField(User, related_name="video_view", blank=True)
     likes = models.ManyToManyField(User, related_name="video_like", blank=True)
     dislikes = models.ManyToManyField(User, related_name="video_dislike", blank=True)

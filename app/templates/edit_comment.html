@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Edit Comment</h1>
+  <form method="post">
+    {% csrf_token %}
+    <label for="comment">Comment:</label><br>
+    <textarea id="comment" name="comment" rows="4" cols="50">{{ comment.text }}</textarea><br><br>
+    <button type="submit">Update Comment</button>
+    <a href="{% url 'video-view' pk=comment.video.id %}">Cancel</a>
+  </form>
+{% endblock %}

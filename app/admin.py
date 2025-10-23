@@ -2,10 +2,10 @@
 # from .models import Video, Comment
 
 # # Unregister Video if already registered
-# try:
-#     admin.site.unregister(Video)
-# except admin.sites.NotRegistered:
-#     pass
+# # try:
+# #     admin.site.unregister(Video)
+# # except admin.sites.NotRegistered:
+# #     pass
 
 # # Register Video
 # @admin.register(Video)
@@ -34,3 +34,9 @@
 #         admin.site.unregister(model)
 #     except admin.sites.NotRegistered:
 #         pass
+
+from django.contrib import admin
+from .models import Video, Comment
+
+
+admin.site.register(Video)
