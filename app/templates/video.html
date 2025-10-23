@@ -1,4 +1,11 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Font Awesome (ensure this is available in base.html, otherwise keep here) -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+/>
 
 <div class="vstack align-items-center" style="margin: 20px">
   <video width="80%" controls>
@@ -87,33 +94,39 @@
 <h2 style="margin-left: 10%">Comments</h2>
 <div class="card" style="margin: 20px; width: 80%; margin-left: 10%">
   <ul class="list-unstyled">
-    {% for comment in video.comments.all %} {% if not comment.parent %}
+    {% for comment in video.comments.all %}
+    {% if not comment.parent %}
     <li style="margin-bottom: 20px" id="comment-{{ comment.id }}">
       <p>
         <strong>{{ comment.user.username }}</strong> • {{ comment.created_at }}
       </p>
       <div id="comment-text-{{ comment.id }}">{{ comment.text }}</div>
+
       {% if user.is_authenticated and user == comment.user %}
-      <button
-        onclick="editComment({{ comment.id }})"
-        class="btn btn-sm btn-outline-info"
-      >
-        Edit
-      </button>
-      <form
-        method="post"
-        action="{% url 'delete_comment' pk=comment.id %}"
-        style="display: inline; padding: 4px"
-      >
-        {% csrf_token %}
-        <button type="submit" class="btn btn-sm btn-outline-danger">
-          Delete
-        </button>
-      </form>
+      <div class="comment-actions">
+        <!-- ✏️ Edit icon -->
+        <i
+          class="fa-solid fa-pen-to-square text-info comment-icon"
+          title="Edit Comment"
+          onclick="editComment({{ comment.id }})"
+        ></i>
+
+        <!-- 🗑️ Delete icon -->
+        <form
+          method="post"
+          action="{% url 'delete_comment' pk=comment.id %}"
+          style="display: inline;"
+        >
+          {% csrf_token %}
+          <button type="submit" class="comment-icon text-danger" title="Delete Comment">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </form>
+      </div>
       {% endif %}
 
       <!-- Reply form -->
-      <form method="post" action="{% url 'video-comment' video.id %}">
+      <form method="post" action="{% url 'video-comment' video.id %}" style="margin-top: 10px;">
         {% csrf_token %}
         <input type="hidden" name="parent_id" value="{{ comment.id }}" />
         <textarea
@@ -121,127 +134,127 @@
           name="comment"
           rows="2"
           placeholder="Reply to this comment..."
-        ></textarea
-        ><br />
+        ></textarea>
+        <br />
         <button type="submit" class="btn btn-sm btn-outline-primary">
           Reply
         </button>
       </form>
 
       <!-- Replies -->
-      <ul style="margin-left: 30px; margin-top: 10px; gap: 3px">
+      <ul style="margin-left: 30px; margin-top: 10px;">
         {% for reply in comment.replies.all %}
         <li id="comment-{{ reply.id }}">
           <p>
             <strong>{{ reply.user.username }}</strong> • {{ reply.created_at }}
           </p>
           <div id="comment-text-{{ reply.id }}">{{ reply.text }}</div>
+
           {% if user.is_authenticated and user == reply.user %}
-          <button
-            onclick="editComment({{ reply.id }})"
-            class="btn btn-sm btn-outline-info"
-          >
-            Edit
-          </button>
-          <form
-            method="post"
-            action="{% url 'delete_comment' pk=reply.id %}"
-            style="display: inline; padding: 4px"
-          >
-            {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-outline-danger">
-              Delete
-            </button>
-          </form>
+          <div class="comment-actions">
+            <!-- ✏️ Edit icon for reply -->
+            <i
+              class="fa-solid fa-pen-to-square text-info comment-icon"
+              title="Edit Reply"
+              onclick="editComment({{ reply.id }})"
+            ></i>
+
+            <!-- 🗑️ Delete icon for reply -->
+            <form
+              method="post"
+              action="{% url 'delete_comment' pk=reply.id %}"
+              style="display: inline;"
+            >
+              {% csrf_token %}
+              <button type="submit" class="comment-icon text-danger" title="Delete Reply">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </form>
+          </div>
           {% endif %}
         </li>
         {% endfor %}
       </ul>
     </li>
-    {% endif %} {% endfor %}
+    {% endif %}
+    {% endfor %}
   </ul>
 </div>
 
+<!-- JS for Editing Comments -->
 <script>
-    function editComment(commentId) {
-            const commentTextDiv = document.getElementById(`comment-text-${commentId}`);
-            const currentText = commentTextDiv.innerText;
+function editComment(commentId) {
+  const commentTextDiv = document.getElementById(`comment-text-${commentId}`);
+  const currentText = commentTextDiv.innerText;
 
-            commentTextDiv.innerHTML = `
-                <textarea id="edit-comment-text-${commentId}" class="form-control">${currentText}</textarea>
-                <button onclick="saveComment(${commentId})" class="btn btn-sm btn-success">Save</button>
-                <button onclick="cancelEdit(${commentId}, '${currentText}')" class="btn btn-sm btn-secondary">Cancel</button>
-            `;
+  commentTextDiv.innerHTML = `
+    <textarea id="edit-comment-text-${commentId}" class="form-control">${currentText}</textarea>
+    <button onclick="saveComment(${commentId})" class="btn btn-sm btn-success mt-2">Save</button>
+    <button onclick="cancelEdit(${commentId}, '${currentText}')" class="btn btn-sm btn-secondary mt-2">Cancel</button>
+  `;
+}
+
+function saveComment(commentId) {
+  const newText = document.getElementById(`edit-comment-text-${commentId}`).value;
+
+  fetch(`/comment/edit/${commentId}/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: `comment=${newText}`
+  })
+  .then(response => {
+    console.log("Response status:", response.status);
+    if (response.ok) {
+      document.getElementById(`comment-text-${commentId}`).innerText = newText;
+    } else {
+      alert('Error saving comment.');
     }
-
-        {% comment %} function saveComment(commentId) {
-            const newText = document.getElementById(`edit-comment-text-${commentId}`).value;
-
-            fetch(`/comment/edit/${commentId}/`, {  // Use the existing URL
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': getCookie('csrftoken')  // Function to get CSRF token
-                },
-                body: `comment=${newText}`
-            })
-            .then(response => {
-                if (response.ok) {
-                    document.getElementById(`comment-text-${commentId}`).innerText = newText;
-                    //Revert back to normal
-                    const commentTextDiv = document.getElementById(`comment-text-${commentId}`);
-                    commentTextDiv.innerHTML = newText;
-                } else {
-                    alert('Error saving comment.');
-                }
-            });
-        } {% endcomment %}
-         function saveComment(commentId) {
-        const newText = document.getElementById(`edit-comment-text-${commentId}`).value;
-
-        fetch(`/comment/edit/${commentId}/`, {  // Use the existing URL
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': getCookie('csrftoken')  // Function to get CSRF token
-            },
-            body: `comment=${newText}`
-        })
-        .then(response => {
-      console.log("Response status:", response.status); // Add this line
-      if (response.ok) {
-          document.getElementById(`comment-text-${commentId}`).innerText = newText;
-          //Revert back to normal
-          const commentTextDiv = document.getElementById(`comment-text-${commentId}`);
-          commentTextDiv.innerHTML = newText;
-      } else {
-          alert('Error saving comment.');
-      }
   });
+}
+
+function cancelEdit(commentId, originalText) {
+  const commentTextDiv = document.getElementById(`comment-text-${commentId}`);
+  commentTextDiv.innerHTML = originalText;
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
     }
-
-        function cancelEdit(commentId, originalText) {
-            const commentTextDiv = document.getElementById(`comment-text-${commentId}`);
-            commentTextDiv.innerHTML = originalText;
-        }
-
-        // Function to get CSRF token from cookies
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    // Does this cookie string begin with the name we want?
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
+  }
+  return cookieValue;
+}
 </script>
+
+<style>
+.comment-actions {
+  margin-top: 5px;
+}
+
+.comment-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  margin-right: 8px;
+  transition: color 0.2s ease, transform 0.1s ease;
+}
+
+.comment-icon:hover {
+  color: #0056b3;
+  transform: scale(1.1);
+}
+</style>
 
 {% endblock %}
 
